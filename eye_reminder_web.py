@@ -8,14 +8,16 @@ st.set_page_config(page_title="Nhắc nghỉ mắt", layout="centered")
 st_autorefresh(interval=60 * 1000, key="auto_refresh")
 
 st.title("👁️ Nhắc nghỉ mắt 20-20-20")
-st.markdown("Hãy nhìn xa **20 feet (6 mét)** trong **20 giây** mỗi khi đủ thời gian!")
+st.markdown("Cứ mỗi khoảng thời gian bạn đặt, hãy nhìn xa **20 feet (6 mét)** trong **20 giây** để thư giãn mắt!")
 
-# Cài đặt thời gian nhắc
-remind_interval = st.selectbox(
-    "⏱️ Chọn thời gian nhắc nghỉ (phút):",
-    options=[10, 15, 20, 25, 30, 45, 60],
-    index=2,
-    key="interval_setting"
+# Cho phép nhập số phút nhắc nghỉ bằng tay
+remind_interval = st.number_input(
+    "⏱️ Nhập số phút sau mỗi lần nhắc nghỉ:",
+    min_value=1,
+    max_value=180,
+    value=20,
+    step=1,
+    key="interval_input"
 )
 
 # Lưu thời điểm bắt đầu vào session
