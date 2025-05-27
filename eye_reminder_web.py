@@ -1,41 +1,33 @@
 import streamlit as st
-import time
+from streamlit_autorefresh import st_autorefresh
+import datetime
 
-st.set_page_config(page_title="Nhắc nghỉ mắt 20-20-20", layout="centered")
+# Tự động refresh mỗi 60 giây
+st_autorefresh(interval=60 * 1000, key="auto_refresh")
 
-st.title("👁️‍🗨️ Nhắc nghỉ mắt 20-20-20")
-st.markdown("**Cứ mỗi 20 phút, hãy nhìn xa 20 feet trong 20 giây để bảo vệ mắt.**")
+st.title("👁️ Nhắc nghỉ mắt 20-20-20")
+st.write("Cứ mỗi 20 phút, hãy nhìn xa 20 feet (6 mét) trong 20 giây để bảo vệ mắt.")
 
-interval = st.number_input("⏱️ Khoảng thời gian giữa mỗi lần nhắc (phút)", min_value=1, value=20)
+# Lưu thời gian bắt đầu
+if "start_time" not in st.session_state:
+    st.session_state.start_time = datetime.datetime.now()
 
-if "running" not in st.session_state:
-    st.session_state.running = False
+# Cho phép người dùng reset thời gian
+if st.button("🔄 Bắt đầu lại"):
+    st.session_state.start_time = datetime.datetime.now()
 
-def start_timer():
-    st.session_state.running = True
+# Tính thời gian đã trôi qua
+elapsed = (datetime.datetime.now() - st.session_state.start_time).total_seconds()
+minutes = int(elapsed // 60)
+seconds = int(elapsed % 60)
 
-def stop_timer():
-    st.session_state.running = False
+st.markdown(f"⏱️ Đã làm việc: **{minutes} phút {seconds} giây**")
 
-col1, col2 = st.columns(2)
-with col1:
-    st.button("▶️ Bắt đầu nhắc", on_click=start_timer, disabled=st.session_state.running)
-with col2:
-    st.button("⏹️ Dừng", on_click=stop_timer, disabled=not st.session_state.running)
+# Nếu >= 20 phút thì hiện thông báo
+if elapsed >= 20 * 60:
+    st.warning("👁️ Đã 20 phút! Hãy nhìn xa 20 feet trong 20 giây!")
+else:
+    remaining = 20*60 - int(elapsed)
+    st.info(f"Còn {remaining//60} phút {remaining%60} giây nữa sẽ nhắc nghỉ.")
 
-placeholder = st.empty()
-
-if st.session_state.running:
-    minutes = interval
-    start_time = time.time()
-    while st.session_state.running:
-        elapsed = (time.time() - start_time) / 60  # phút
-        if elapsed >= minutes:
-            placeholder.warning("👁️ Đã đến giờ nghỉ! Hãy nhìn xa 20 feet trong 20 giây!", icon="🔔")
-            st.audio("https://www.soundjay.com/button/beep-07.wav", format="audio/wav")
-            start_time = time.time()  # reset
-        else:
-            remaining = int(minutes - elapsed)
-            placeholder.info(f"⏳ Còn {remaining} phút đến lần nghỉ tiếp theo...")
-        time.sleep(5)
-        st.experimental_rerun()
+st.caption("Made with ❤️ using Streamlit")
