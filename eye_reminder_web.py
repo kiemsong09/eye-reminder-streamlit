@@ -2,32 +2,42 @@ import streamlit as st
 from streamlit_autorefresh import st_autorefresh
 import datetime
 
+st.set_page_config(page_title="Nhắc nghỉ mắt", layout="centered")
+
 # Tự động refresh mỗi 60 giây
 st_autorefresh(interval=60 * 1000, key="auto_refresh")
 
 st.title("👁️ Nhắc nghỉ mắt 20-20-20")
-st.write("Cứ mỗi 20 phút, hãy nhìn xa 20 feet (6 mét) trong 20 giây để bảo vệ mắt.")
+st.markdown("Hãy nhìn xa **20 feet (6 mét)** trong **20 giây** mỗi khi đủ thời gian!")
 
-# Lưu thời gian bắt đầu
+# Cài đặt thời gian nhắc
+remind_interval = st.selectbox(
+    "⏱️ Chọn thời gian nhắc nghỉ (phút):",
+    options=[10, 15, 20, 25, 30, 45, 60],
+    index=2,
+    key="interval_setting"
+)
+
+# Lưu thời điểm bắt đầu vào session
 if "start_time" not in st.session_state:
     st.session_state.start_time = datetime.datetime.now()
 
-# Cho phép người dùng reset thời gian
+# Nút bắt đầu lại
 if st.button("🔄 Bắt đầu lại"):
     st.session_state.start_time = datetime.datetime.now()
 
-# Tính thời gian đã trôi qua
+# Tính thời gian trôi qua
 elapsed = (datetime.datetime.now() - st.session_state.start_time).total_seconds()
 minutes = int(elapsed // 60)
 seconds = int(elapsed % 60)
 
-st.markdown(f"⏱️ Đã làm việc: **{minutes} phút {seconds} giây**")
+st.markdown(f"⏳ Đã làm việc: **{minutes} phút {seconds} giây**")
 
-# Nếu >= 20 phút thì hiện thông báo
-if elapsed >= 20 * 60:
-    st.warning("👁️ Đã 20 phút! Hãy nhìn xa 20 feet trong 20 giây!")
+# Nhắc khi đủ thời gian
+if elapsed >= remind_interval * 60:
+    st.warning("👁️ Đã đến lúc nghỉ! Hãy nhìn xa 20 feet trong 20 giây!")
 else:
-    remaining = 20*60 - int(elapsed)
-    st.info(f"Còn {remaining//60} phút {remaining%60} giây nữa sẽ nhắc nghỉ.")
+    remain = remind_interval * 60 - int(elapsed)
+    st.info(f"⏲️ Còn {remain // 60} phút {remain % 60} giây nữa sẽ nhắc nghỉ.")
 
-st.caption("Made with ❤️ using Streamlit")
+st.caption("Made with ❤️ bằng Streamlit")
